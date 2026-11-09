@@ -1,4 +1,4 @@
-"""Polite fetching + clean text extraction."""
+
 import re
 import time
 import hashlib
@@ -65,6 +65,13 @@ def _get(client: httpx.Client, url: str) -> httpx.Response | None:
         r = client.get(url, timeout=20, follow_redirects=True)
         r.raise_for_status()
         return r
+    except httpx.HTTPStatusError as e:
+        # Missing or blocked public pages are skipped. Other failures stay visible.
+        if e.response.status_code in (401, 403, 404, 410):
+            log.info("skip %s (%s)", url, e.response.status_code)
+        else:
+            log.warning("fetch failed %s: %s", url, e)
+        return None
     except httpx.HTTPError as e:
         log.warning("fetch failed %s: %s", url, e)
         return None
@@ -147,6 +154,13 @@ def _fetch(src: Source) -> list[Doc]:
     return docs
 
 
+def fetch_page(url: str, category: str, source: str) -> Doc | None:
+    """Read one public page so a question can see whether it changed."""
+    src = Source(source or "page", category or "general", "page", [url], refresh_minutes=0)
+    with _client() as client:
+        return _page(client, src, url)
+
+
 def _page(client: httpx.Client, src: Source, url: str) -> Doc | None:
     r = _get(client, url)
     if not r or "html" not in r.headers.get("content-type", ""):
@@ -205,6 +219,6 @@ def _crawl(client: httpx.Client, src: Source) -> list[Doc]:
             p = urlparse(nxt)
             if p.netloc in hosts and nxt not in seen and \
                (not src.link_patterns or any(pat in p.path for pat in src.link_patterns)) and \
-               not re.search(r"\.(pdf|jpg|png|zip|docx?|xlsx?)$", p.path, re.I):
+               not re.search(r"\.(pdf|jpe?g|png|gif|zip|docx?|xlsx?|pptx?|mp[34]|ics)$", p.path, re.I):
                 queue.append(nxt)
     return docs

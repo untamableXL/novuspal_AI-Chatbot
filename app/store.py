@@ -8,6 +8,6 @@ The chosen database does not embed text; app/embed.py does that locally.
 from .config import settings
 
 if settings.vector_backend == "pgvector":
-    from .store_pg import prune_source, search, stats, upsert_doc  # noqa: F401
+    from .store_pg import list_texts, page_text, prune_source, search, stats, upsert_doc  # noqa: F401
 else:
-    from .store_chroma import prune_source, search, stats, upsert_doc  # noqa: F401
+    from .store_chroma import list_texts, page_text, prune_source, search, stats, upsert_doc  # noqa: F401

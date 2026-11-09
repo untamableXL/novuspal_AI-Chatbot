@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     max_new_tokens: int = 320
     embed_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     chroma_dir: str = "./chroma_data"
-    user_agent: str = "NovusPalBot/0.1"
+    user_agent: str = "MTUAssistantBot/0.1"
     admin_api_key: str = "novuspal"
     request_delay_s: float = 1.0  # politeness delay between requests to the same host
     max_pages_per_source: int = 60
@@ -36,7 +36,7 @@ class Source:
       - "crawl": start at `urls`, follow same-site links matching `link_patterns`
     """
     name: str
-    category: str  # news | events | library | tutoring | registration | general
+    category: str  # news | events | library | tutoring | registration | housing | career | campus | general
     kind: str
     urls: list[str]
     refresh_minutes: int
@@ -49,11 +49,35 @@ class Source:
 # must NOT be scraped; use an official API / IT-approved integration instead.
 SOURCES: list[Source] = [
     Source("mtu-news", "news", "feed", ["https://www.mtu.edu/news/"], refresh_minutes=15),
-    Source("mtu-events", "events", "page", ["https://www.mtu.edu/events/"], refresh_minutes=30),
+    Source("mtu-events", "events", "page", [
+        "https://events.mtu.edu/",
+        "https://events.mtu.edu/calendar",
+    ], refresh_minutes=30),
     Source("library", "library", "crawl", ["https://www.mtu.edu/library/"], refresh_minutes=360,
            link_patterns=["/library/"]),
-    Source("tutoring", "tutoring", "crawl", ["https://www.mtu.edu/learning-center/"], refresh_minutes=360,
-           link_patterns=["/learning-center/"]),
+    Source("tutoring", "tutoring", "crawl", [
+        "https://www.mtu.edu/success/academic/support/learning-centers/",
+        "https://www.mtu.edu/math/undergraduate/learning-center/",
+        "https://www.mtu.edu/computing/undergraduate/cclc/",
+        "https://www.mtu.edu/sciences-arts/about/writing-center/",
+        "https://www.mtu.edu/success/academic/support/coaches/",
+    ], refresh_minutes=360, link_patterns=[
+        "/learning-center", "/learning-centers", "/cclc", "/writing-center",
+        "/success/academic/support",
+    ]),
     Source("registration", "registration", "crawl", ["https://www.mtu.edu/registrar/"], refresh_minutes=720,
            link_patterns=["/registrar/"]),
+    Source("housing", "housing", "crawl", ["https://www.mtu.edu/residential-living/"], refresh_minutes=720,
+           link_patterns=["/residential-living/"]),
+    Source("career", "career", "crawl", ["https://www.mtu.edu/career/"], refresh_minutes=720,
+           link_patterns=["/career/"]),
+    Source("campus", "campus", "page", [
+        "https://www.mtu.edu/it/help/",
+        "https://www.mtu.edu/well-being/",
+        "https://www.mtu.edu/publicsafety/",
+        "https://www.mtu.edu/deanofstudents/",
+        "https://www.mtu.edu/finaid/",
+        "https://www.mtu.edu/admissions/financial/tuition/",
+        "https://michigantechrecreation.com/",
+    ], refresh_minutes=720),
 ]

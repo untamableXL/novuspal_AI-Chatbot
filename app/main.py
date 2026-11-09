@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from .config import SOURCES, settings
 from . import ingest, store
 from .embed import embed
+from .events import upcoming_events
 from .rag import runtime_info, stream_chat, warm_model
 
 logging.basicConfig(level=logging.INFO)
@@ -75,6 +76,11 @@ def health():
     return {"status": "ok", **store.stats(), **runtime_info(), "last_runs": ingest.last_runs}
 
 
+@app.get("/highlights")
+def highlights():
+    return upcoming_events()
+
+
 @app.get("/sources")
 def sources():
     return [
@@ -108,7 +114,7 @@ def chat(body: ChatIn):
             log.exception("chat failed")
             yield _sse({
                 "type": "error",
-                "text": "The local model could not answer. Please try again.",
+                "text": "Something went wrong while answering. Please try again.",
             })
 
     return StreamingResponse(

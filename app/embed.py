@@ -8,6 +8,11 @@ import os
 import threading
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 from sentence_transformers import SentenceTransformer
 

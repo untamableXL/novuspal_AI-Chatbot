@@ -77,6 +77,26 @@ def search(query: str, k: int = 5, category: str | None = None) -> list[dict]:
     return [{**dict(zip(keys, r[:8])), "score": round(float(r[8]), 4)} for r in rows]
 
 
+def list_texts(category: str, limit: int = 12) -> list[str]:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT text FROM chunks WHERE category=%s ORDER BY ingested_at DESC LIMIT %s",
+            (category, limit),
+        ).fetchall()
+    return [r[0] for r in rows if r[0]]
+
+
+def page_text(url: str) -> tuple[str, str]:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT title, text, chunk FROM chunks WHERE url=%s ORDER BY chunk",
+            (url,),
+        ).fetchall()
+    if not rows:
+        return "", ""
+    return rows[0][0] or "", "\n".join(row[1] for row in rows if row[1])
+
+
 def stats() -> dict:
     with _conn() as conn:
         n = conn.execute("SELECT count(*) FROM chunks").fetchone()[0]

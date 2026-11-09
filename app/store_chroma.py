@@ -66,5 +66,24 @@ def search(query: str, k: int = 5, category: str | None = None) -> list[dict]:
     ]
 
 
+def list_texts(category: str, limit: int = 12) -> list[str]:
+    got = _col.get(where={"category": category}, include=["documents"], limit=limit)
+    return [d for d in (got.get("documents") or []) if d]
+
+
+def page_text(url: str) -> tuple[str, str]:
+    got = _col.get(where={"url": url}, include=["documents", "metadatas"], limit=40)
+    if not got["ids"]:
+        return "", ""
+    rows = []
+    title = ""
+    for doc, meta in zip(got["documents"] or [], got["metadatas"] or []):
+        meta = meta or {}
+        title = title or (meta.get("title") or "")
+        rows.append((meta.get("chunk") or 0, doc or ""))
+    rows.sort(key=lambda item: item[0])
+    return title, "\n".join(text for _, text in rows if text)
+
+
 def stats() -> dict:
     return {"backend": "chroma", "chunks": _col.count()}

@@ -1,8 +1,12 @@
-# NovusPal
+# MTU Assistant
 
 Student chat for Michigan Technological University. A FastAPI app reads public MTU pages into a local vector database and answers questions with a model that runs on this machine. Replies stream into the chat page as they are written. The answer states the facts directly; matching campus pages are shown separately under the message.
 
 Answers do not call Gemini, OpenAI, or any other hosted model API. The retrieved page text stays local.
+
+- [User guide](docs/USER.md) ([PDF](docs/USER.pdf)) — start the app, ask questions, and read the replies
+- [Technical documentation](docs/TECHNICAL.md) ([PDF](docs/TECHNICAL.pdf)) — architecture, ingest, API, and configuration
+- [Program design](docs/PROGRAM_DESIGN.md) ([PDF](docs/PROGRAM_DESIGN.pdf)) — goals, modules, data, and the decisions behind them
 
 ## Run
 
